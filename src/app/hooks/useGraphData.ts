@@ -28,12 +28,11 @@ const useGraphData = (
       uuid: entity.id,
       id: entity.name,
       name: entity.name,
+      // title: entity.title,
       type: entity.type,
       description: entity.description,
       human_readable_id: entity.human_readable_id,
-      graph_embedding: entity.graph_embedding,
       text_unit_ids: entity.text_unit_ids,
-      description_embedding: entity.description_embedding,
       neighbors: [],
       links: [],
     }));
@@ -43,17 +42,15 @@ const useGraphData = (
 
     const links: CustomLink[] = relationships
       .map((relationship) => ({
-        source: relationship.source,
-        target: relationship.target,
-        type: relationship.type,
-        weight: relationship.weight,
-        description: relationship.description,
-        text_unit_ids: relationship.text_unit_ids,
         id: relationship.id,
         human_readable_id: relationship.human_readable_id,
-        source_degree: relationship.source_degree,
-        target_degree: relationship.target_degree,
-        rank: relationship.rank,
+        source: relationship.source,
+        target: relationship.target,
+        description: relationship.description,
+        weight: relationship.weight,
+        combined_degree: relationship.combined_degree,
+        text_unit_ids: relationship.text_unit_ids,
+        type: relationship.type,
       }))
       .filter((link) => nodesMap[link.source] && nodesMap[link.target]);
 
@@ -63,10 +60,11 @@ const useGraphData = (
       const documentNodes = documents.map((document) => ({
         uuid: document.id,
         id: document.id,
+        human_readable_id: document.human_readable_id,
         name: document.title,
         title: document.title,
         type: "RAW_DOCUMENT", // avoid conflict with "DOCUMENT" type
-        raw_content: document.raw_content,
+        text: document.text,
         text_unit_ids: document.text_unit_ids,
         neighbors: [],
         links: [],
@@ -102,6 +100,7 @@ const useGraphData = (
         document_ids: textunit.document_ids,
         entity_ids: textunit.entity_ids,
         relationship_ids: textunit.relationship_ids,
+        covariate_ids: textunit.covariate_ids,
         neighbors: [],
         links: [],
       }));
@@ -124,10 +123,15 @@ const useGraphData = (
     }
 
     if (includeCommunities) {
+      console.log('Communities:', communities);
+      console.log('Relationships:', relationships);
+      console.log('Entities:', entities);
+
       const communityNodes = communities.map((community) => {
         const report = communityReports.find(
-          (r) => r.community.toString() === community.id.toString()
+          (r) => r.community.toString() === community.community.toString()
         );
+        console.log('Report:', report);
         return {
           uuid: community.id.toString(),
           id: community.id.toString(),
@@ -147,8 +151,11 @@ const useGraphData = (
         };
       });
 
+      console.log('Community Nodes:', communityNodes);
+
       communityNodes.forEach(node => nodesMap[node.id] = node);
       nodes.push(...communityNodes);
+      console.log('Finished adding community nodes');
 
       const uniqueLinks = new Set<string>();
       const communityEntityLinks = communities
@@ -164,6 +171,10 @@ const useGraphData = (
 
             if (!uniqueLinks.has(sourceLinkId)) {
               uniqueLinks.add(sourceLinkId);
+              console.log('Source Link ID:', sourceLinkId);
+              console.log('Target Link ID:', targetLinkId);
+              console.log('Relationship:', relationship);
+              console.log('Community:', community);
               newLinks.push({
                 source: relationship.source,
                 target: community.id.toString(),
@@ -171,6 +182,7 @@ const useGraphData = (
                 id: sourceLinkId,
               });
             }
+            console.log('New Links:', newLinks);
 
             if (!uniqueLinks.has(targetLinkId)) {
               uniqueLinks.add(targetLinkId);
@@ -186,8 +198,9 @@ const useGraphData = (
           })
         )
         .flat();
-
+      
       links.push(...communityEntityLinks);
+      console.log("Done with community entity links");
 
       //Add finding nodes and links
       communityNodes.forEach((communityNode) => {
@@ -216,6 +229,7 @@ const useGraphData = (
 
             links.push(findingLink);
           });
+          console.log("Done with finding nodes and links");
         }
       });
     }
@@ -231,16 +245,12 @@ const useGraphData = (
         type: covariate.type,
         description: covariate.description || "",
         subject_id: covariate.subject_id,
-        subject_type: covariate.subject_type,
         object_id: covariate.object_id,
-        object_type: covariate.object_type,
         status: covariate.status,
         start_date: covariate.start_date,
         end_date: covariate.end_date,
         source_text: covariate.source_text,
         text_unit_id: covariate.text_unit_id,
-        document_ids: covariate.document_ids,
-        n_tokens: covariate.n_tokens,
         neighbors: [],
         links: [],
       }));
@@ -258,6 +268,8 @@ const useGraphData = (
       links.push(...covariateTextUnitLinks);
     }
 
+    console.log('Nodes:', nodes);
+    console.log("Starting to add neighbors and links");
     links.forEach(link => {
       const sourceNode = nodesMap[link.source];
       const targetNode = nodesMap[link.target];
@@ -272,6 +284,8 @@ const useGraphData = (
           targetNode.links!.push(link);
       }
     });
+
+    console.log("Finished adding neighbors and links");
 
 
     if (nodes.length > 0) {

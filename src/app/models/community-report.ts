@@ -1,21 +1,33 @@
 import { MRT_ColumnDef } from "material-react-table";
 
+// OLD: Index(['community', 'full_content', 'level', 'rank', 'title',
+//   'rank_explanation', 'summary', 'findings', 'full_content_json', 'id'],
+//  dtype='object')
+// NEW: Index(['id', 'human_readable_id', 'community', 'level', 'title', 'summary',
+//        'full_content', 'rank', 'rank_explanation', 'findings',
+//        'full_content_json', 'period', 'size'],
+//       dtype='object')
+
 export interface Finding {
     explanation: string;
     summary: string;
 }
 
+
 export interface CommunityReport {
+    id: string;
+    human_readable_id: number;
     community: number;
-    full_content: string;
     level: number;
-    rank: number;
     title: string;
-    rank_explanation: string;
     summary: string;
+    full_content: string;
+    rank: number;
+    rank_explanation: string;
     findings: Finding[];
     full_content_json: string;
-    id: string;
+    period: string;
+    size: number;
 }
 
 export const findingColumns: MRT_ColumnDef<Finding>[] = [
@@ -36,32 +48,40 @@ export const findingColumns: MRT_ColumnDef<Finding>[] = [
 
 export const communityReportColumns: MRT_ColumnDef<CommunityReport>[] = [
     {
-      accessorKey: "community",
-      header: "Community",
+      accessorKey: "id",
+      header: "ID",
     },
     {
-      accessorKey: "full_content",
-      header: "Full Content",
+      accessorKey: "human_readable_id",
+      header: "Human Readable ID",
+    },
+    {
+      accessorKey: "community",
+      header: "Community",
     },
     {
       accessorKey: "level",
       header: "Level",
     },
     {
-      accessorKey: "rank",
-      header: "Rank",
-    },
-    {
       accessorKey: "title",
       header: "Title",
     },
     {
-      accessorKey: "rank_explanation",
-      header: "Rank Explanation",
-    },
-    {
       accessorKey: "summary",
       header: "Summary",
+    },
+    {
+      accessorKey: "full_content",
+      header: "Full Content",
+    },
+    {
+      accessorKey: "rank",
+      header: "Rank",
+    },
+    {
+      accessorKey: "rank_explanation",
+      header: "Rank Explanation",
     },
     {
       accessorKey: "findings",
@@ -76,7 +96,11 @@ export const communityReportColumns: MRT_ColumnDef<CommunityReport>[] = [
       header: "Full Content JSON",
     },
     {
-      accessorKey: "id",
-      header: "ID",
+      accessorKey: "period",
+      header: "Period",
+    },
+    {
+      accessorKey: "size",
+      header: "Size",
     },
   ];

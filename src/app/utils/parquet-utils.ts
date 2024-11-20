@@ -1,4 +1,6 @@
 import { parquetRead, ParquetReadOptions } from "hyparquet";
+import { title } from "process";
+import { text } from "stream/consumers";
 
 export class AsyncBuffer {
   private buffer: ArrayBuffer;
@@ -34,87 +36,135 @@ export const readParquetFile = async (
     return new Promise((resolve, reject) => {
       const options: ParquetReadOptions = {
         file: asyncBuffer,
+
+        // OLD: Index(['id', 'name', 'type', 'description', 'human_readable_id',
+        //   'graph_embedding', 'text_unit_ids', 'description_embedding'],
+        //  dtype='object')
+        // NEW: Index(['id', 'human_readable_id', 'title', 'type', 'description',
+        //   'text_unit_ids'],
+        //  dtype='object')
         onComplete: (rows: any[][]) => {
           if (schema === "entity") {
             resolve(
               rows.map((row) => ({
                 id: row[0],
-                name: row[1],
-                type: row[2],
-                description: row[3],
-                human_readable_id: parseValue(row[4], "number"),
-                graph_embedding: row[5],
-                text_unit_ids: row[6],
-                description_embedding: row[7],
+                name: row[2],
+                human_readable_id: parseValue(row[1], "number"),
+                title: row[2],
+                type: row[3],
+                description: row[4],
+                text_unit_ids: row[5],
               }))
             );
+          
+            // OLD : Index(['source', 'target', 'weight', 'description', 'text_unit_ids', 'id',
+            //   'human_readable_id', 'source_degree', 'target_degree', 'rank'],
+            //  dtype='object')
+
+            // NEW: Index(['id', 'human_readable_id', 'source', 'target', 'description', 'weight',
+            //   'combined_degree', 'text_unit_ids'],
+            //  dtype='object')
           } else if (schema === "relationship") {
             resolve(
               rows.map((row) => ({
-                source: row[0],
-                target: row[1],
-                type: "RELATED", // Custom field to match neo4j
-                weight: row[2],
-                description: row[3],
-                text_unit_ids: row[4],
-                id: row[5],
-                human_readable_id: parseValue(row[6], "number"),
-                source_degree: parseValue(row[7], "number"),
-                target_degree: parseValue(row[8], "number"),
-                rank: parseValue(row[9], "number"),
+                id: row[0],
+                human_readable_id: parseValue(row[1], "number"),
+                source: row[2],
+                target: row[3],
+                description: row[4],
+                weight: parseValue(row[6], "number"),
+                combined_degree: parseValue(row[6], "number"),
+                text_unit_ids: row[7],
               }))
             );
+          // OLD(['id', 'text_unit_ids', 'raw_content', 'title'], dtype='object')
+          // NEW: Index(['id', 'human_readable_id', 'title', 'text', 'text_unit_ids'], dtype='object')
+
           } else if (schema === "document") {
             resolve(
               rows.map((row) => ({
                 id: row[0],
-                text_unit_ids: row[1],
-                raw_content: row[2],
-                title: row[3],
+                human_readable_id: parseValue(row[1], "number"),
+                title: row[2],
+                text: row[3],
+                text_unit_ids: row[4],
               }))
             );
+            // OLD: Index(['id', 'text', 'n_tokens', 'document_ids', 'entity_ids',
+            //   'relationship_ids'],
+            // NEW: Index(['id', 'human_readable_id', 'text', 'n_tokens', 'document_ids',
+            //   'entity_ids', 'relationship_ids', 'covariate_ids'],
+            //  dtype='object')
           } else if (schema === "text_unit") {
             resolve(
               rows.map((row) => ({
                 id: row[0],
-                text: row[1],
-                n_tokens: parseValue(row[2], "number"),
-                document_ids: row[3],
-                entity_ids: row[4],
-                relationship_ids: row[5],
+                human_readable_id: parseValue(row[1], "number"),
+                text: row[2],
+                n_tokens: parseValue(row[3], "number"),
+                document_ids: row[4],
+                entity_ids: row[5],
+                relationship_ids: row[6],
+                covariate_ids: row[7],
               }))
             );
+
+            // OLD: Index(['id', 'title', 'level', 'relationship_ids', 'text_unit_ids'], dtype='object')
+            // NEW: Index(['id', 'human_readable_id', 'community', 'level', 'title', 'entity_ids',
+            //   'relationship_ids', 'text_unit_ids', 'period', 'size'],
+            //  dtype='object')
+
           } else if (schema === "community") {
             resolve(
               rows.map((row) => ({
                 id: row[0],
-                title: row[1],
-                level: parseValue(row[2], "number"),
-                ...(row.length > 5
-                  ? { raw_community: parseValue(row[3], "number") }
-                  : {}), // From graphrag 0.3.X onwards, raw_community is removed
-                relationship_ids: row[row.length > 5 ? 4 : 3],
-                text_unit_ids: row[row.length > 5 ? 5 : 4],
+                human_readable_id: parseValue(row[1], "number"),
+                community: parseValue(row[2], "number"),
+                level: parseValue(row[3], "number"),
+                title: row[4],
+                entity_ids: row[5],
+                relationship_ids: row[6],
+                text_unit_ids: row[7],
+                period: row[8],
+                size: parseValue(row[9], "number"),
               }))
             );
+          
+          // OLD: Index(['community', 'full_content', 'level', 'rank', 'title',
+          //   'rank_explanation', 'summary', 'findings', 'full_content_json', 'id'],
+          //  dtype='object')
+          // NEW: Index(['id', 'human_readable_id', 'community', 'level', 'title', 'summary',
+          //        'full_content', 'rank', 'rank_explanation', 'findings',
+          //        'full_content_json', 'period', 'size'],
+          //       dtype='object')
+          
           } else if (schema === "community_report") {
             resolve(
               rows.map((row) => ({
-                community: parseValue(row[0], "number"),
-                full_content: row[1],
-                level: parseValue(row[2], "number"),
-                rank: parseValue(row[3], "number"),
+                id: row[0],
+                human_readable_id: parseValue(row[1], "number"),
+                community: parseValue(row[2], "number"),
+                level: parseValue(row[3], "number"),
                 title: row[4],
-                rank_explanation: row[5],
-                summary: row[6],
-                findings: row[7].map((finding: any) => ({
+                summary: row[5],
+                full_content: row[6],
+                rank: parseValue(row[7], "number"),
+                rank_explanation: row[8],
+                findings: row[9].map((finding: any) => ({
                   explanation: finding.explanation,
                   summary: finding.summary,
                 })),
-                full_content_json: row[8],
-                id: row[9],
+                full_content_json: row[10],
+                period: row[11],
+                size: parseValue(row[12], "number"),
               }))
             );
+
+            // NEW: Index(['id', 'human_readable_id', 'covariate_type', 'type', 'description',
+            //   'subject_id', 'object_id', 'status', 'start_date', 'end_date',
+            //   'source_text', 'text_unit_id'],
+            //  dtype='object')
+
           } else if (schema === "covariate") {
             resolve(
               rows.map((row) => ({
@@ -124,16 +174,12 @@ export const readParquetFile = async (
                 type: row[3],
                 description: row[4],
                 subject_id: row[5],
-                subject_type: row[6],
-                object_id: row[7],
-                object_type: row[8],
-                status: row[9],
-                start_date: row[10],
-                end_date: row[11],
-                source_text: row[12],
-                text_unit_id: row[13],
-                document_ids: row[14],
-                n_tokens: parseValue(row[15], "number"),
+                object_id: row[6],
+                status: row[7],
+                start_date: row[8],
+                end_date: row[9],
+                source_text: row[10],
+                text_unit_id: row[11],
               }))
             );
           } else {

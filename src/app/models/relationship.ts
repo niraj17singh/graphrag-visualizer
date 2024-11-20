@@ -1,48 +1,26 @@
 import { MRT_ColumnDef } from "material-react-table";
 
+// OLD : Index(['source', 'target', 'weight', 'description', 'text_unit_ids', 'id',
+//   'human_readable_id', 'source_degree', 'target_degree', 'rank'],
+//  dtype='object')
+
+// NEW: Index(['id', 'human_readable_id', 'source', 'target', 'description', 'weight',
+//   'combined_degree', 'text_unit_ids'],
+//  dtype='object')
+
 export interface Relationship {
-    source: string;
-    target: string;
-    weight: number;
-    description: string;
-    text_unit_ids: string[];
     id: string;
     human_readable_id: number;
-    source_degree: number;
-    target_degree: number;
-    rank: number;
+    source: string;
+    target: string;
+    description: string;
+    weight: number;
+    combined_degree: number;
+    text_unit_ids: string[];
     type: string; // Custom field to match neo4j
 }
 
 export const relationshipColumns: MRT_ColumnDef<Relationship>[] = [
-    {
-        accessorKey: "source",
-        header: "Source",
-    },
-    {
-        accessorKey: "target",
-        header: "Target",
-    },
-    {
-        accessorKey: "type",
-        header: "Type",
-    },
-    {
-        accessorKey: "weight",
-        header: "Weight",
-    },
-    {
-        accessorKey: "description",
-        header: "Description",
-    },
-    {
-        accessorKey: "text_unit_ids",
-        header: "Text Unit IDs",
-        Cell: ({ renderedCellValue }) =>
-            Array.isArray(renderedCellValue)
-              ? JSON.stringify(renderedCellValue, null, 2)
-              : renderedCellValue,
-    },
     {
         accessorKey: "id",
         header: "ID",
@@ -52,17 +30,36 @@ export const relationshipColumns: MRT_ColumnDef<Relationship>[] = [
         header: "Human Readable ID",
     },
     {
-        accessorKey: "source_degree",
-        header: "Source Degree",
+        accessorKey: "source",
+        header: "Source",
     },
     {
-        accessorKey: "target_degree",
-        header: "Target Degree",
+        accessorKey: "target",
+        header: "Target",
     },
     {
-        accessorKey: "rank",
-        header: "Rank",
+        accessorKey: "description",
+        header: "Description",
     },
-    
-    
+    {
+        accessorKey: "weight",
+        header: "Weight",
+    },
+    {
+        accessorKey: "combined_degree",
+        header: "Combined Degree",
+    },
+
+    {
+        accessorKey: "text_unit_ids",
+        header: "Text Unit IDs",
+        Cell: ({ renderedCellValue }) =>
+            Array.isArray(renderedCellValue)
+              ? JSON.stringify(renderedCellValue, null, 2)
+              : renderedCellValue,
+    },
+    {
+        accessorKey: "type",
+        header: "Type",
+    },
 ];

@@ -1,14 +1,19 @@
 import { MRT_ColumnDef } from "material-react-table";
 
+// OLD: Index(['id', 'name', 'type', 'description', 'human_readable_id',
+//   'graph_embedding', 'text_unit_ids', 'description_embedding'],
+//  dtype='object')
+// NEW: Index(['id', 'human_readable_id', 'title', 'type', 'description',
+//   'text_unit_ids'],
+//  dtype='object')
 export interface Entity {
     id: string;
+    human_readable_id: number;
     name: string;
+    title: string;
     type: string;
     description: string;
-    human_readable_id: number;
-    graph_embedding: number[];
     text_unit_ids: string[];
-    description_embedding: number[];
 }
 
 export const entityColumns: MRT_ColumnDef<Entity>[] = [
@@ -17,8 +22,16 @@ export const entityColumns: MRT_ColumnDef<Entity>[] = [
       header: "ID",
     },
     {
+      accessorKey: "human_readable_id",
+      header: "Human Readable ID",
+    },
+    {
       accessorKey: "name",
       header: "Name",
+    },
+    {
+      accessorKey: "title",
+      header: "Title",
     },
     {
       accessorKey: "type",
@@ -33,27 +46,11 @@ export const entityColumns: MRT_ColumnDef<Entity>[] = [
       header: "Human Readable ID",
     },
     {
-      accessorKey: "graph_embedding",
-      header: "Graph Embedding",
-      Cell: ({ renderedCellValue }) =>
-        Array.isArray(renderedCellValue)
-          ? JSON.stringify(renderedCellValue, null, 2)
-          : renderedCellValue,
-    },
-    {
       accessorKey: "text_unit_ids",
       header: "Text Unit IDs",
       Cell: ({ renderedCellValue }) =>
         Array.isArray(renderedCellValue)
           ? JSON.stringify(renderedCellValue, null, 2)
           : renderedCellValue,
-    },
-    {
-      accessorKey: "description_embedding",
-      header: "Description Embedding",
-      Cell: ({ renderedCellValue }) =>
-        Array.isArray(renderedCellValue)
-          ? JSON.stringify(renderedCellValue, null, 2)
-          : renderedCellValue,
-    },
+    }
   ];

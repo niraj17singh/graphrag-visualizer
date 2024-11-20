@@ -1,10 +1,14 @@
 import { MRT_ColumnDef } from "material-react-table";
 
+// OLD(['id', 'text_unit_ids', 'raw_content', 'title'], dtype='object')
+// NEW: Index(['id', 'human_readable_id', 'title', 'text', 'text_unit_ids'], dtype='object')
+
 export interface Document {
     id: string;
-    text_unit_ids: string[];
-    raw_content: string;
+    human_readable_id: number;
     title: string;
+    text: string;
+    text_unit_ids: string[];
 }
 
 export const documentColumns: MRT_ColumnDef<Document>[] = [
@@ -13,12 +17,16 @@ export const documentColumns: MRT_ColumnDef<Document>[] = [
       header: "ID",
     },
     {
-      accessorKey: "raw_content",
-      header: "Raw Content",
+      accessorKey: "human_readable_id",
+      header: "Human Readable ID",
     },
     {
       accessorKey: "title",
       header: "Title",
+    },
+    {
+      accessorKey: "text",
+      header: "Text",
     },
     {
       accessorKey: "text_unit_ids",

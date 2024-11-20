@@ -9,14 +9,11 @@ import { Finding } from "./community-report";
 export interface CustomNode extends NodeObject {
     uuid: string;
     id: string;
-    name: string;
-    type: string;
     title?: string;
+    type: string;
     description?: string;
     human_readable_id?: number;
-    graph_embedding?: number[];
     text_unit_ids?: string[];
-    description_embedding?: number[];
     neighbors?: CustomNode[];
     links?: CustomLink[];
     text?: string;
@@ -25,8 +22,7 @@ export interface CustomNode extends NodeObject {
     entity_ids?: string[];
     relationship_ids?: string[];   
     level?: number;
-    raw_community?: number; 
-    raw_content?: string;
+    raw_community?: number;
     rank?: number;
     rank_explanation?: string;
     summary?: string;
@@ -52,8 +48,7 @@ export interface CustomLink extends LinkObject {
     text_unit_ids?: string[];
     id: string;
     human_readable_id?: number;
-    source_degree?: number;
-    target_degree?: number;
+    combined_degree?: number;
     rank?: number;
   }
   
@@ -67,10 +62,6 @@ export interface CustomGraphData extends GraphData {
     {
       accessorKey: "uuid",
       header: "ID",
-    },
-    {
-      accessorKey: "name",
-      header: "Name",
     },
     {
       accessorKey: "type",
@@ -213,12 +204,8 @@ export interface CustomGraphData extends GraphData {
         header: "Human Readable ID",
     },
     {
-        accessorKey: "source_degree",
-        header: "Source Degree",
-    },
-    {
-        accessorKey: "target_degree",
-        header: "Target Degree",
+        accessorKey: "combined_degree",
+        header: "Combined Degree",
     },
     {
         accessorKey: "rank",

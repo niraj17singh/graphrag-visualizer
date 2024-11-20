@@ -1,5 +1,10 @@
 import { MRT_ColumnDef } from "material-react-table";
 
+// NEW: Index(['id', 'human_readable_id', 'covariate_type', 'type', 'description',
+//   'subject_id', 'object_id', 'status', 'start_date', 'end_date',
+//   'source_text', 'text_unit_id'],
+//  dtype='object')
+
 export interface Covariate {
     id: string;
     human_readable_id: number;
@@ -7,16 +12,12 @@ export interface Covariate {
     type: string;
     description: string;
     subject_id: string;
-    subject_type: string;
     object_id: string;
-    object_type: string;
     status: string;
     start_date: string;
     end_date: string;
     source_text: string;
     text_unit_id: string;
-    document_ids: string[];
-    n_tokens: number;
 }
 
 export const covariateColumns: MRT_ColumnDef<Covariate>[] = [
@@ -45,16 +46,8 @@ export const covariateColumns: MRT_ColumnDef<Covariate>[] = [
       header: "Subject ID",
     },
     {
-      accessorKey: "subject_type",
-      header: "Subject Type",
-    },
-    {
       accessorKey: "object_id",
       header: "Object ID",
-    },
-    {
-      accessorKey: "object_type",
-      header: "Object Type",
     },
     {
       accessorKey: "status",
@@ -76,17 +69,4 @@ export const covariateColumns: MRT_ColumnDef<Covariate>[] = [
       accessorKey: "text_unit_id",
       header: "Text Unit ID",
     },
-    {
-      accessorKey: "document_ids",
-      header: "Document IDs",
-      Cell: ({ renderedCellValue }) =>
-        Array.isArray(renderedCellValue)
-          ? JSON.stringify(renderedCellValue, null, 2)
-          : renderedCellValue,
-    },
-    {
-      accessorKey: "n_tokens",
-      header: "Number of Tokens",
-    },
-    
   ];
